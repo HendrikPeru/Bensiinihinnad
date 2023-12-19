@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Asukoha ja kütuse valik</title>
+</head>
+<body>
+    <h1>Tere tulemast!</h1>
+    <form action="/submit" method="post">
+        <label for="location">Asukoht:</label>
+        <input type="text" id="location" name="location"><br><br>
+        
+        <label for="fuel_type">Millist bensiini soovite tankida:</label>
+        <select id="fuel_type" name="fuel_type">
+            <option value="95">95</option>
+            <option value="98">98</option>
+            <option value="diisel">Diisel</option>
+            <option value="LPG">LPG</option>
+        </select><br><br>
+        
+        <input type="submit" value="Leia mulle lähim tankla">
+    </form>
+</body>
+</html>
