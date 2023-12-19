@@ -1,2 +1,2 @@
 # Bensiinihinnad
-Pythoni projekt, mis tagastab kasutajale kõige odavama kütusehinna vastavalt sisestatud kütusetüübile ning asukohale
+Pythoni projekt, mis võtab kasutaja sisestatud asukoha ning tagastab talle kõige lähemal oleva tankla soovitud bensiinihinna.
