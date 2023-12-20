@@ -14,70 +14,78 @@ def saa_koordinaadid(koht):
         pikkuskraad = asukoht.longitude
         return laiuskraad, pikkuskraad
 
-def scrape_gas_prices(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    gas_data = {}
+def saa_kütusehinnad(url):
+    vaste = requests.get(url)
+    soup = BeautifulSoup(vaste.text, 'html.parser')
+    kütusehinnad = {}
 
     # Leitakse kõik tabelid
-    tables = soup.find_all('table')
+    tabelid = soup.find_all('table')
 
-    for table in tables:
-        rows = table.find_all('tr')[1:]  # Ignoreerime päiseid
+    for tabel in tabelid:
+        read = tabel.find_all('tr')[1:]  # Ignoreerime päiseid
 
-        for row in rows:
-            columns = row.find_all('td')
+        for rida in read:
+            veerud = rida.find_all('td')
 
             # Kui veerge on vähem kui oodatakse, siis jäetakse rida vahele
-            if len(columns) < 5:
+            if len(veerud) < 5:
                 continue
 
             # Leia aadress, mis on br ja small tagide vahel
-            address_tag = columns[0].find('br').find_next('small')
-            if address_tag:
-                address = address_tag.text.strip()  # Aadressi tekst
+            aadress_tag = veerud[0].find('br').find_next('small')
+            if aadress_tag:
+                aadress = aadress_tag.text.strip()  # Aadressi tekst
 
-                # Kütusehindade tuple
-                prices = (
-                    columns[1].text.strip(),
-                    columns[2].text.strip(),
-                    columns[3].text.strip(),
-                    columns[4].text.strip()
+                # Kütusehindade ennik
+                hinnad = (
+                    veerud[1].text.strip(),
+                    veerud[2].text.strip(),
+                    veerud[3].text.strip(),
+                    veerud[4].text.strip()
                 )
 
                 # Lisatakse sõnastik listi
-                gas_data[address] = prices
+                kütusehinnad[aadress] = hinnad
 
-    return gas_data
+    return kütusehinnad
 
-def find_closest_gas_stations(user_address, max_distance):
+def lähimad_tanklad(kasutaja_aadress, max_distants):
+    # Kasutab funktsiooni saa_kütusehinnad, et saada kõikide tanklate kütusehinnad
     url = "https://gas.didnt.work/?country=ee&brand=&city="
-    all_gas_stations = scrape_gas_prices(url)
+    kõik_tanklad = saa_kütusehinnad(url)
 
-    user_coords = saa_koordinaadid(user_address)
-    close_stations = {}
+    # Kasutab funktsiooni saa_koordinaadid, et saada kasutaja aadressi koordinaadid
+    koordinaadid = saa_koordinaadid(kasutaja_aadress)
+    lähedal_olevad_tanklad = {}
 
-    if user_coords:
-        for address, coords in all_gas_stations.items():
-            station_coords = saa_koordinaadid(address)
-            if station_coords:
-                distance = great_circle(user_coords, station_coords).kilometers
-                if distance <= max_distance:
-                    close_stations[address] = all_gas_stations[address]
-
-        if close_stations:
-            return close_stations
+    # Kui koordinaadid on olemas, siis leitakse kõik tanklad, mis on antud kauguse piires
+    if koordinaadid:
+        for aadress, koordinaat in kõik_tanklad.items():
+            tanklakoordinaat = saa_koordinaadid(aadress)
+            if tanklakoordinaat:
+                distants = great_circle(koordinaadid, tanklakoordinaat).kilometers
+                if distants <= max_distants:
+                    lähedal_olevad_tanklad[aadress] = kõik_tanklad[aadress]
+        # Kui leiti sobivaid tanklaid, siis tagastatakse need
+        if lähedal_olevad_tanklad:
+            return lähedal_olevad_tanklad
+        # Kui ei leitud sobivaid tanklaid, siis tagastatakse veateade
         else:
             return "Ühtegi sobivat tanklat ei leitud antud kauguse piires."
 
+# Kui kasutaja sisestab aadressi ja maksimaalse kauguse, siis tagastatakse talle sobivad tanklad
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    # Kui kasutaja vajutab nuppu, siis võetakse vormist andmed
     if request.method == 'POST':
-        user_address = request.form['address']
+        kasutaja_aadress = request.form['address']
         max_dist = float(request.form['max_distance'])
-        result = find_closest_gas_stations(user_address, max_dist)
+        result = lähimad_tanklad(kasutaja_aadress, max_dist)
+        # Kui tulem on sõnastik, siis tagastatakse sobivad tanklad
         if isinstance(result, dict):
             return render_template('tulemused.html', result=result)
+        # Kui tulem on veateade, siis tagastatakse veateade
         else:
             return render_template('tulemused.html', error=result)
     return render_template('index.html')
