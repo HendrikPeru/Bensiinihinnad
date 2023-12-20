@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tulemused</title>
+</head>
+<body>
+    <h1>Lähimad tanklad:</h1>
+    {% if error %}
+        <p>{{ error }}</p>
+    {% else %}
+        <ul>
+            {% for station, prices in result.items() %}
+                <li>
+                    <h3>Tankla aadress: {{ station }}</h3>
+                    <p>Kütusehinnad:</p>
+                    <ul>
+                        <li>Diisel: {{ prices[0] }}</li>
+                        <li>98 bensiin: {{ prices[1] }}</li>
+                        <li>95 bensiin: {{ prices[2] }}</li>
+                        <li>LPG: {{ prices[3] }}</li>
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
