@@ -3,8 +3,15 @@ from geopy.geocoders import Nominatim
 from geopy.distance import great_circle
 import requests
 from bs4 import BeautifulSoup
+#from flask_socketio import SocketIO
 
 app = Flask(__name__)
+#flaski liidese socketio kasutamine kui algpordil on päringute arv ületatud.
+#app.config["TEMPLATES_AUTO_RELOAD"] = True
+#app.config['SECRET_KEY'] = '123456789'
+#app.secret_key = "bensiinihinnad"
+#socketio = SocketIO(app, async_mode='eventlet')
+#TEMPLATES_AUTO_RELOAD = True
 
 def saa_koordinaadid(koht):
     geokooder = Nominatim(user_agent="minu_rakendus")
@@ -91,4 +98,4 @@ def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True)#socketio.run(app, port=8080) #kui algport on erroris päringute limiidi ületamise tõttu, siis tuleks kasutada seda rida app.run asemel
